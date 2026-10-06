@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Veritabanı
+  db:
+    image: postgres:15-alpine
+    container_name: f1_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: f1user
+      POSTGRES_PASSWORD: f1password
+      POSTGRES_DB: f1ticketdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - f1-network
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: f1_backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      # Veritabanı 'db' servisi üzerinden erişiliyor (Docker network dns)
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/f1ticketdb
+      - SPRING_DATASOURCE_USERNAME=f1user
+      - SPRING_DATASOURCE_PASSWORD=f1password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - db
+    networks:
+      - f1-network
+
+  # Angular Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: f1_frontend
+    restart: always
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    # Hot-reload ve dosya değişikliklerini algılaması için volume mount
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - f1-network
+
+volumes:
+  pgdata: # Veritabanı verilerinin kalıcılığı için
+
+networks:
+  f1-network:
+    driver: bridge

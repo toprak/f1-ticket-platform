@@ -1,0 +1,21 @@
+# IDE Dosyaları
+.idea/
+*.iml
+.vscode/
+
+# Backend (Java/Spring Boot)
+backend/target/
+*.jar
+
+# Frontend (Angular/Node)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+
+# İşletim Sistemi Dosyaları
+.DS_Store
+Thumbs.db
+
+# Veritabanı Kalıntıları (Docker Volume Yansımaları)
+pgdata/
